@@ -1,0 +1,34 @@
+version: '3'
+
+networks:
+  splunkNet:
+    driver: bridge
+
+services:
+  # Splunk forwarder to send all syslogs to Splunk
+  splunk-forwarder:
+    container_name: splunk_fwd
+    image: 'splunk/universalforwarder:6.5.0'
+    environment:
+      SPLUNK_FORWARD_SERVER: 'splunk.local:9997'
+      SPLUNK_FORWARD_SERVER_ARGS: '-method clone'
+      SPLUNK_START_ARGS: '--accept-license --answer-yes'
+      SPLUNK_ADD: 'udp 1514 -index splunk_docker_bootstrap -sourcetype STACK_NAME'
+      SPLUNK_USER: 'root'
+    ports:
+      - '514:1514/udp'
+    restart: 'always'
+    networks:
+      splunkNet:
+        aliases:
+          - splunkFwd.local
+
+  # Log producer
+  app:
+    image: 'alpine'
+    command: 'sh -c "while true; do echo \"hi `date`\"; sleep 10; done;"'
+    logging:
+      driver: 'syslog'
+      options:
+        tag: 'POC_ALPINE'
+        syslog-address: 'udp://127.0.0.1'

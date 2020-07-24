@@ -1,0 +1,28 @@
+version: '3'
+
+networks:
+  splunkNet:
+    driver: bridge
+
+volumes:
+  splunk-var:
+    external: true
+  splunk-etc:
+    external: true
+
+services:
+  splunk:
+    container_name: splunk
+    image: 'splunk/splunk:latest'
+    environment:
+      SPLUNK_START_ARGS: '--accept-license'
+      SPLUNK_PASSWORD: 'splunk1234'
+    volumes:
+      - splunk-var:/opt/splunk/var
+      - splunk-etc:/opt/splunk/etc
+    ports:
+      - 8000:8000
+    networks:
+      splunkNet:
+        aliases:
+          - splunk.local
