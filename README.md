@@ -6,7 +6,8 @@ This project is
 - a minimal quick splunk docker bootstrap 
 - `docker compose` based 
 - a running splunk server 
-- a simple app (alpine based) producing logs forwarded to splunk.
+- a simple app producing syslogs forwarded to splunk via udp
+- a simple app2 producing log files forwarded to splunk via shared volume
 
 This project is not
 - an advanced usage of splunk,
@@ -20,7 +21,7 @@ This project is not
  tips: you can add `make` to git bash for windows [here](https://gist.github.com/evanwill/0207876c3243bbb6863e65ec5dc3f058).
  And `Makefile` is easy to read, you can just pick docker commands.
 
-## HowTo
+## HowTo setup splunk server
 
 - create storage (docker volume)
 
@@ -46,18 +47,22 @@ docker logs -f splunk
 *once started, you could*
  
 - connect splunk at [localhost:8000](http://admin:splunk1234@localhost:8000) (admin/splunk1234)
-- go to `Parameters` / `Index` / `New index`
-- add an index with as name `splunk_docker_bootstrap`, and `50` Mo size.
+- go to `Parameters` / `Index` / `New index` to add following indexes:
+  1) name `docker_udp` of `50` Mo size.
+  2) name `docker_file` of `50` Mo size.
 - click on `save`
 
-- start splunk forwarder and alpine sample that generates logs
+## HowTo setup splunk forwarder and apps
+- start splunk forwarder and alpine samples that generates logs
 ```
 make forwarderStart
 docker logs splunk_fwd
 ```
 
-- check that logs are coming [using index search](http://localhost:8000/fr-FR/app/search/search?q=search%20index%3D%22splunk_docker_bootstrap%22)
-
+- then check splunk
+ [using index='docker_udp' search](http://localhost:8000/fr-FR/app/search/search?q=search%20index%3Ddocker_udp)
+ or [using index='docker_file' search](http://localhost:8000/fr-FR/app/search/search?q=search%20index%3Ddocker_file)
+ 
 - that's it !
 
 
